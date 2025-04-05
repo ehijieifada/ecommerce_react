@@ -2,15 +2,17 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const ProductCard = ({ product }) => {
+
+  const API_URL = import.meta.env.VITE_API_URL;
   //  Determine correct image source
-  let imageUrl = "/fallback-image.jpg"; // Default fallback
+  let imageUrl = "/fallback-image.jpg"; 
 
   if (product.images && product.images.length > 0) {
     imageUrl = product.images[0].startsWith("/uploads/")
-      ? `http://localhost:5000${product.images[0]}` // Use uploaded image from backend
-      : product.images[0]; // Use static image from assets
+      ? `${API_URL}${product.images[0]}` // Use uploaded image from backend
+      : product.images[0]; 
   } else if (product.image) {
-    imageUrl = product.image; // Static image (if `image` prop is used)
+    imageUrl = product.image; 
   }
 
   return (

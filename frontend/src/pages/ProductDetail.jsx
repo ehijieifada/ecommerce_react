@@ -14,35 +14,39 @@ const ProductDetail = () => {
   const [success, setSuccess] = useState(false);
   const [mainImage, setMainImage] = useState("");
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/products/list");
-        const foundProduct =
-          response.data.find((p) => p._id === id) || staticProducts.find((p) => p._id === id);
+  
+  const API_URL = import.meta.env.VITE_API_URL;
 
-        if (foundProduct) {
-          setProduct(foundProduct);
-          setMainImage(formatImageURL(foundProduct.images?.[0] || foundProduct.image?.[0]));
-        }
-      } catch (error) {
-        console.error("❌ Error fetching product:", error);
+useEffect(() => {
+  const fetchProduct = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/api/products/list`);
+      const foundProduct =
+        response.data.find((p) => p._id === id) || staticProducts.find((p) => p._id === id);
+
+      if (foundProduct) {
+        setProduct(foundProduct);
+        setMainImage(formatImageURL(foundProduct.images?.[0] || foundProduct.image?.[0]));
       }
-    };
-
-    fetchProduct();
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [id]);
-
-  const formatImageURL = (img) => {
-    if (!img) return "/fallback-image.jpg";
-    if (img.startsWith("/uploads/")) {
-      return `http://localhost:5000${img}`;
-    } else if (img.startsWith("/assets/") && !img.startsWith("http")) {
-      return `http://localhost:5173${img}`;
+    } catch (error) {
+      console.error("❌ Error fetching product:", error);
     }
-    return img;
   };
+
+  fetchProduct();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}, [id]);
+
+const formatImageURL = (img) => {
+  if (!img) return "/fallback-image.jpg"; // Default image if missing
+
+  if (img.startsWith("/uploads/")) {
+    return `${API_URL}${img}`; // Append the correct API URL
+  }
+  
+  return img;
+};
+
 
   if (!product) {
     return <div className="text-center text-lg font-semibold p-6">Product not found</div>;

@@ -11,6 +11,8 @@ const Cart = () => {
 
   const total = cartItems.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
@@ -37,7 +39,7 @@ const Cart = () => {
                   <img
                     src={
                       item.images
-                        ? `http://localhost:5000${item.images[0]}`
+                        ? `${API_URL}${item.images[0]}`
                         : item.image[0]
                     }
                     alt={item.name}

@@ -8,6 +8,8 @@ const PlaceOrder = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -57,7 +59,7 @@ const PlaceOrder = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/orders/add", {
+      const response = await fetch(`${API_URL}/api/orders/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newOrder),
@@ -134,7 +136,7 @@ const PlaceOrder = () => {
           </div>
           <button
             onClick={handlePlaceOrder}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition"
+            className="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
           >
             Place Order
           </button>

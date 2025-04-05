@@ -5,14 +5,15 @@ import { products as staticProducts } from "../assets/assets"; // Static product
 
 const ProductCarousel = () => {
   const [isPaused, setIsPaused] = useState(false);
-  const [scrollPosition, setScrollPosition] = useState(0); // Track exact position
+  const [scrollPosition, setScrollPosition] = useState(0); 
   const [productList, setProductList] = useState([]);
 
+  const API_URL = import.meta.env.VITE_API_URL;
   // Fetch recommended products from backend OR fallback to static products
   useEffect(() => {
     const fetchRecommendedProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/products/list");
+        const response = await axios.get(`${API_URL}/api/products/list`);
         const dynamicProducts = response.data.length > 0 ? response.data : staticProducts;
         setProductList(dynamicProducts);
       } catch (error) {

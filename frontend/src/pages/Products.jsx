@@ -19,10 +19,13 @@ const Products = () => {
   const categories = ["Men", "Women", "Kids", "Gadgets", "Electronics"];
   const types = ["Topwear", "Winterwear", "Bottomwear", "Computing", "Audio & sound", "Mobile & wearables" ];
 
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     if (!staticProducts || staticProducts.length === 0) {
       axios
-        .get("http://localhost:5000/api/products/list")
+        .get(`${API_URL}/api/products/list`)
         .then((response) => setDynamicProducts(response.data))
         .catch((error) => console.error("❌ Error fetching products:", error));
     }

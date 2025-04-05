@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const OrderSchema = new mongoose.Schema({
+const orderSchema = new mongoose.Schema({
   items: [
     {
       _id: String,
@@ -26,5 +26,5 @@ const OrderSchema = new mongoose.Schema({
   paymentMethod: { type: String, default: "stripe" },
 });
 
-const Order = mongoose.model("Order", OrderSchema);
-export default Order;
+const order = mongoose.model("Order", orderSchema);
+export default order;

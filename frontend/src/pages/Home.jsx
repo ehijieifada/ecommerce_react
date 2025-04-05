@@ -10,10 +10,12 @@ const Home = () => {
   const [dynamicProducts, setDynamicProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([...staticProducts]); // Initialize with static products
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Fetch dynamic products from MongoDB
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/products/list")
+      .get(`${API_URL}/api/products/list`)
       .then((response) => {
         setDynamicProducts(response.data);
       })

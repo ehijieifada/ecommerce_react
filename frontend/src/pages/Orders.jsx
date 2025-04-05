@@ -5,9 +5,11 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/orders")
+      .get(`${API_URL}/api/orders`)
       .then((response) => {
         console.log("📦 Orders fetched:", response.data);
         setOrders(response.data);
@@ -22,7 +24,7 @@ const Orders = () => {
   // fetch and display the current status from MongoDB
   const trackOrder = async (orderId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/orders/${orderId}`);
+      const response = await axios.get(`${API_URL}/api/orders/${orderId}`);
       const order = response.data;
       alert(`Current status for Order ${orderId}: ${order.status}`);
     } catch (error) {
@@ -69,15 +71,16 @@ const Orders = () => {
                         <img
                           src={
                             item.images?.length
-                              ? item.images[0]
-                              : "http://localhost:5000/fallback-image.jpg"
+                              ? `${API_URL}${item.images[0].startsWith("/") ? item.images[0] : `/uploads/${item.images[0]}`}`
+                              : `${API_URL}/fallback-image.jpg`
                           }
                           alt={item.name}
                           className="w-16 h-16 object-cover rounded mr-4"
                           onError={(e) => {
-                            e.target.src = "http://localhost:5000/fallback-image.jpg";
+                            e.target.src = `${API_URL}/fallback-image.jpg`;
                           }}
                         />
+
                         <div>
                           <p className="font-semibold">{item.name}</p>
                           <p>Size: {item.size || "N/A"}</p>  {/* Display selected size */}

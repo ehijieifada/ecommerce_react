@@ -5,27 +5,29 @@ import AdminSidebar from "./AdminSidebar";
 const ListProducts = () => {
   const [products, setProducts] = useState([]);
 
-  // ✅ Fetch products from backend
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // Fetch products from backend
   useEffect(() => {
     fetchProducts();
   }, []);
 
   const fetchProducts = () => {
     axios
-      .get("http://localhost:5000/api/products/list")
+      .get(`${API_URL}/api/products/list`)
       .then((response) => {
         setProducts(response.data);
       })
       .catch((error) => console.error("Error fetching products", error));
   };
 
-  // ✅ Function to delete product from MongoDB
+  // Function to delete product from MongoDB
   const handleDelete = async (productId) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/products/delete/${productId}`);
-      setProducts(products.filter((product) => product._id !== productId)); // ✅ Remove from UI
+      await axios.delete(`${API_URL}/api/products/delete/${productId}`);
+      setProducts(products.filter((product) => product._id !== productId)); 
       alert("Product deleted successfully!");
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -48,7 +50,7 @@ const ListProducts = () => {
                 <img
                   src={
                     product.images && product.images.length > 0
-                      ? `http://localhost:5000${product.images[0]}`
+                      ? product.images[0] //  Cloudinary URL
                       : "/fallback-image.jpg"
                   }
                   alt={product.name}

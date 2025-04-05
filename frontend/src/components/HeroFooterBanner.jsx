@@ -34,9 +34,9 @@ const HeroFooterBanner = () => {
         </Link>
 
         <div className="mt-3 md:mt-5">
-          <p className="text-white">Beats Solo Wireless</p>
-          <h1 className="text-lg md:text-xl font-bold text-white">Summer Sale</h1>
-          <p className="text-gray-100">Fantastic headphones on the market</p>
+          <p className="text-white">SmartFit Pro X Smartwatch</p>
+          <h1 className="text-lg md:text-xl font-bold text-white">Holiday Sale</h1>
+          <p className="text-gray-100">Fantastic Smartwatch on the Market</p>
         </div>
       </div>
     </section>

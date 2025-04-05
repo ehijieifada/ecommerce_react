@@ -6,9 +6,11 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/orders")
+      .get(`${API_URL}/api/orders`)
       .then((response) => {
         console.log("📦 Admin Orders fetched:", response.data);
         setOrders(response.data);
@@ -22,7 +24,7 @@ const AdminOrders = () => {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put(`http://localhost:5000/api/orders/update/${orderId}`, { status: newStatus });
+      await axios.put(`${API_URL}/api/orders/update/${orderId}`, { status: newStatus });
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order._id === orderId ? { ...order, status: newStatus } : order
@@ -75,13 +77,18 @@ const AdminOrders = () => {
                     {order.items.map((item, index) => (
                       <li key={index} className="flex items-center border-b pb-2">
                         <img
-                          src={item.images && item.images.length > 0 ? item.images[0] : "http://localhost:5173/assets/fallback-image.jpg"}
+                          src={
+                            item.images?.length
+                              ? `${API_URL}${item.images[0].startsWith("/") ? item.images[0] : `/uploads/${item.images[0]}`}`
+                              : `${API_URL}/fallback-image.jpg`
+                          }
                           alt={item.name}
-                          className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded mr-4"
+                          className="w-16 h-16 object-cover rounded mr-4"
                           onError={(e) => {
-                            e.target.src = "http://localhost:5173/assets/fallback-image.jpg"; // ✅ Fallback image
+                            e.target.src = `${API_URL}/fallback-image.jpg`;
                           }}
                         />
+
                         <div className="text-sm sm:text-base">
                           <p className="font-semibold">{item.name}</p>
                           <p>Size: {item.size || "N/A"}</p>
