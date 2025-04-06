@@ -27,7 +27,7 @@ const HeroFooterBanner = () => {
         <p className="text-lg md:text-xl font-semibold text-gray-200">25 Nov to 5 Dec</p>
 
         <Link
-          to="/products/67e81020074c5adf3611d0d9"
+          to="/products/67f2a24ac9994ce402eb7a65"
           className="inline-block mt-4 bg-blue-600 px-5 py-2 text-white rounded-lg text-lg font-semibold hover:bg-orange-800 transition"
         >
           Shop Now

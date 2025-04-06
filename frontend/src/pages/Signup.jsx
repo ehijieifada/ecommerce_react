@@ -23,7 +23,7 @@ const Signup = () => {
     
     // Redirect after 2 seconds
     setTimeout(() => {
-      navigate('/');
+      navigate('/login');
     }, 2000);
   };
 
