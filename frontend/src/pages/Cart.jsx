@@ -36,18 +36,21 @@ const Cart = () => {
                 className="flex justify-between items-center border-b py-4"
               >
                 <div className="flex items-center">
-                  <img
-                    src={
-                      item.images
-                        ? `${API_URL}${item.images[0]}`
-                        : item.image[0]
-                    }
-                    alt={item.name}
-                    className="bg-gray-100 w-20 h-20 object-cover rounded mr-4"
-                    onError={(e) => {
-                      e.target.src = "/fallback-image.jpg";
-                    }}
-                  />
+                <img
+                      src={
+                        item.images
+                          ? item.images[0].startsWith("http")
+                            ? item.images[0]
+                            : `${API_URL}${item.images[0]}`
+                          : item.image[0]
+                      }
+                      alt={item.name}
+                      className="bg-gray-100 w-20 h-20 object-cover rounded mr-4"
+                      onError={(e) => {
+                        e.target.src = "/fallback-image.jpg";
+                      }}
+                />
+
                   <div>
                     <h2 className="text-xl">{item.name}</h2>
                     {item.selectedSize && <p>Size: {item.selectedSize}</p>}
