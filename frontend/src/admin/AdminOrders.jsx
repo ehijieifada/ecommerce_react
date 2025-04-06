@@ -77,18 +77,20 @@ const AdminOrders = () => {
                     {order.items.map((item, index) => (
                       <li key={index} className="flex items-center border-b pb-2">
                         <img
-                          src={
-                            item.images?.length
-                              ? `${API_URL}${item.images[0].startsWith("/") ? item.images[0] : `/uploads/${item.images[0]}`}`
-                              : `${API_URL}/fallback-image.jpg`
-                          }
-                          alt={item.name}
-                          className="w-16 h-16 object-cover rounded mr-4"
-                          onError={(e) => {
-                            e.target.src = `${API_URL}/fallback-image.jpg`;
-                          }}
+                            src={
+                              item.images?.length
+                                ? item.images[0].startsWith("http")
+                                  ? item.images[0]
+                                  : `${API_URL}${item.images[0]}`
+                                : "/fallback-image.jpg"
+                            }
+                            alt={item.name}
+                            className="w-16 h-16 object-cover rounded mr-4"
+                            onError={(e) => {
+                              e.target.src = "/fallback-image.jpg";
+                            }}
                         />
-
+                        
                         <div className="text-sm sm:text-base">
                           <p className="font-semibold">{item.name}</p>
                           <p>Size: {item.size || "N/A"}</p>
