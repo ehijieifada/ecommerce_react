@@ -5,6 +5,7 @@ import ProductCard from "../components/ProductCard";
 import HeroBanner from "../components/HeroBanner";
 import HeroFooterBanner from "../components/HeroFooterBanner";
 import { products as staticProducts } from "../assets/assets"; // Import static products
+import ChatBubble from "../components/ChatBubble";
 
 const Home = () => {
   const [dynamicProducts, setDynamicProducts] = useState([]);
@@ -76,6 +77,7 @@ const Home = () => {
           </Link>
         </div>
       </section>
+      <ChatBubble />
 
       <HeroFooterBanner />
     </div>
