@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { fetchGeminiResponse } from "./api";
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const bottomRef = useRef(null); // 👈 create ref
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -17,6 +18,11 @@ const Chatbot = () => {
     setMessages((prev) => [...prev, { text: response, isUser: false }]);
     setIsLoading(false);
   };
+
+  // 👇 Auto-scroll to bottom when messages update
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
 
   return (
     <div className="flex flex-col h-full p-2 bg-gray-100 text-sm">
@@ -38,6 +44,9 @@ const Chatbot = () => {
             <div className="w-2 h-2 bg-black rounded-full animate-bounce"></div>
           </div>
         )}
+
+        {/* 👇 Scroll target */}
+        <div ref={bottomRef} />
       </div>
 
       <div className="flex items-center gap-1 mt-2">
