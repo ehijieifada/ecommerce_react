@@ -10,7 +10,7 @@ const HeroBanner = () => {
       {/*  Left Side: Text Content */}
       <div className="text-center md:text-left md:w-1/2 space-y-3">
         <h1 className="text-lg md:text-xl font-semibold">Beats Solo Wireless</h1>
-        <h2 className="text-2xl md:text-3xl font-bold text-black">Summer Sale</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-black">Holiday Sale</h2>
         <Link
           to="/products/67f3ab194235a05f11c2371b"
           className="inline-block mt-2 bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition"
