@@ -60,11 +60,11 @@ const Chatbot = () => {
             }
           }}
           className="flex-1 p-1.5 text-sm border rounded"
-          placeholder="Ask me anything"
+          placeholder="Ask me about the company"
         />
         <button
           onClick={handleSend}
-          className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+          className="px-2 py-1 bg-blue-600 text-white rounded text-xs hover:bg-orange-700 cursor-pointer"
         >
           Send
         </button>

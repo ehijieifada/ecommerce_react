@@ -21,7 +21,7 @@ const ChatBubble = () => {
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-md transition"
+        className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-md transition cursor-pointer"
         aria-label="Toggle Chatbot"
       >
         {isOpen ? (
