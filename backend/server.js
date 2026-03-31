@@ -2,13 +2,16 @@ import express from "express";
 import mongoose, { connect } from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+
+// Load environment variables before importing routes/controllers that may read them
+dotenv.config();
+
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminAuthRoutes from "./routes/adminAuthRoutes.js"; 
+import genaiRoutes from "./routes/genaiRoutes.js";
 import connectCloudinary from "./cloudinaryConfig.js";
-
-dotenv.config();
 
 const app = express();
 connectCloudinary();
@@ -21,6 +24,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/auth", authRoutes); //  User Auth Routes
 app.use("/api/admin", adminAuthRoutes); //  Admin Auth Routes
+app.use("/api/genai", genaiRoutes); // server-side Gemini proxy
 
 mongoose
   .connect(process.env.MONGO_URI)

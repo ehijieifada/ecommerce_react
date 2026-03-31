@@ -49,8 +49,8 @@ const Home = () => {
           <p className="text-center col-span-full">Loading latest products...</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {latestProducts.map((product) => (
-              <ProductCard key={product._id || product.name} product={product} />
+            {latestProducts.map((product, index) => (
+              <ProductCard key={product._id || index} product={product} />
             ))}
           </div>
         )}
@@ -69,8 +69,8 @@ const Home = () => {
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           {bestSellers.length > 0 ? (
-            bestSellers.map((product) => (
-              <ProductCard key={product._id || product.name} product={product} />
+            bestSellers.map((product, index) => (
+              <ProductCard key={product._id || index} product={product} />
             ))
           ) : (
             <p className="text-center col-span-full">No Best Sellers Available</p>

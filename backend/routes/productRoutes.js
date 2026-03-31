@@ -3,6 +3,7 @@ import express from "express";
 import upload from "../middleware/multer.js";
 import {
   getProductList,
+  getProductById,
   addProduct,
   deleteProduct,
 } from "../controllers/productController.js";
@@ -11,6 +12,7 @@ const router = express.Router();
 
 // Routes
 router.get("/list", getProductList);
+router.get("/:id", getProductById);
 router.post("/add", upload.array("images", 4), addProduct);
 router.delete("/delete/:id", deleteProduct);
 

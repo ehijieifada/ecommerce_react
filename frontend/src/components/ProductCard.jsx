@@ -27,7 +27,7 @@ const ProductCard = ({ product }) => {
         />
         <div className="mt-2 text-center">
           <h2 className="text-sm sm:text-base font-semibold text-gray-800">{product.name}</h2>
-          <p className="text-gray-600">${product.price.toFixed(2)}</p>
+          <p className="text-gray-600">${product.price ? product.price.toFixed(2) : 'N/A'}</p>
         </div>
       </Link>
     </div>

@@ -14,7 +14,7 @@ const ProductCarousel = () => {
     const fetchRecommendedProducts = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/products/list`);
-        const dynamicProducts = response.data.length > 0 ? response.data : staticProducts;
+        const dynamicProducts = Array.isArray(response.data) && response.data.length > 0 ? response.data : staticProducts;
         setProductList(dynamicProducts);
       } catch (error) {
         console.error("❌ Error fetching recommended products:", error);

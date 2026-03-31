@@ -20,16 +20,20 @@ const ProductDetail = () => {
 useEffect(() => {
   const fetchProduct = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/products/list`);
-      const foundProduct =
-        response.data.find((p) => p._id === id) || staticProducts.find((p) => p._id === id);
-
-      if (foundProduct) {
-        setProduct(foundProduct);
-        setMainImage(formatImageURL(foundProduct.images?.[0] || foundProduct.image?.[0]));
-      }
+      // First try to fetch from backend
+      const response = await axios.get(`${API_URL}/api/products/${id}`);
+      setProduct(response.data);
+      setMainImage(formatImageURL(response.data.images?.[0] || response.data.image?.[0]));
     } catch (error) {
-      console.error("❌ Error fetching product:", error);
+      // If backend fails, try static products
+      console.error("❌ Error fetching from backend, trying static:", error);
+      const staticProduct = staticProducts.find((p) => p._id === id);
+      if (staticProduct) {
+        setProduct(staticProduct);
+        setMainImage(formatImageURL(staticProduct.images?.[0] || staticProduct.image?.[0]));
+      } else {
+        console.error("Product not found in static products either");
+      }
     }
   };
 
