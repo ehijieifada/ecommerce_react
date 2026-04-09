@@ -19,8 +19,11 @@ connectCloudinary();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
-  credentials: true,
+  origin: [
+    'http://localhost:5173',
+    'https://blisstechiq.netlify.app'
+  ],
+  credentials: true
 }));
 // Dev helper: expose whether Authorization header was present on responses and log it
 if (process.env.NODE_ENV !== 'production') {
