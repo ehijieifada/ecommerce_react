@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
+// Use a short string _id so the DB object id can be a 9-digit numeric string.
 const orderSchema = new mongoose.Schema({
+  _id: { type: String },
   items: [
     {
       _id: String,
@@ -8,7 +10,7 @@ const orderSchema = new mongoose.Schema({
       price: Number,
       quantity: Number,
       size: String,
-      images: { type: [String], required: true }, 
+      images: { type: [String], required: true },
     },
   ],
   total: Number,
@@ -24,6 +26,9 @@ const orderSchema = new mongoose.Schema({
     country: String,
   },
   paymentMethod: { type: String, default: "stripe" },
+  // Short numeric order id for display (max 9 digits). Generated at creation.
+  shortId: { type: String, unique: true, index: true },
+  // Note: no createdBy fields in original schema
 });
 
 const order = mongoose.model("Order", orderSchema);

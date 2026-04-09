@@ -39,6 +39,13 @@ const AdminLogin = () => {
         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
           Login
         </button>
+        {/* Show signup link only if frontend explicitly enabled it via VITE_ADMIN_SIGNUP_ENABLED=true */}
+        {import.meta.env.VITE_ADMIN_SIGNUP_ENABLED === "true" && (
+          <div className="mt-3 text-sm">
+            <span>Don't have an account? </span>
+            <button type="button" onClick={() => navigate('/admin/signup')} className="text-blue-600 underline">Sign up</button>
+          </div>
+        )}
       </form>
     </div>
   );

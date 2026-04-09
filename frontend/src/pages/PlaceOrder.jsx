@@ -41,6 +41,11 @@ const PlaceOrder = () => {
       return;
     }
 
+    const populatedDeliveryInfo = {
+      ...deliveryInfo,
+      email: user?.email || deliveryInfo.email,
+    };
+
     const newOrder = {
       items: cartItems.map((item) => ({
         _id: item._id || "unknown_id",
@@ -54,8 +59,8 @@ const PlaceOrder = () => {
       date: new Date(),
       status: "Pending",
       paymentMethod,
-      deliveryInfo,
-      user: user.username,
+      deliveryInfo: populatedDeliveryInfo,
+      user: user?.email,
     };
 
     try {

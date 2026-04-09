@@ -18,7 +18,24 @@ connectCloudinary();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true,
+}));
+// Dev helper: expose whether Authorization header was present on responses and log it
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    const auth = req.headers.authorization || req.headers.Authorization;
+    if (auth) {
+      console.log('[server] Request had Authorization header (redacted):', auth.length > 24 ? `${auth.slice(0,12)}...${auth.slice(-8)}` : auth);
+      res.setHeader('X-Debug-Auth', 'present');
+    } else {
+      console.log('[server] Request had NO Authorization header');
+      res.setHeader('X-Debug-Auth', 'missing');
+    }
+    next();
+  });
+}
 app.use("/uploads", express.static("uploads"));
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);

@@ -1,15 +1,37 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
 const Orders = () => {
+  const { user, admin, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    axios
-      .get(`${API_URL}/api/orders`)
+    if (!user) {
+      if (admin) {
+        navigate("/admin/orders");
+      } else {
+        navigate("/login");
+      }
+      return;
+    }
+
+    // Strict validation: reject if user token has admin flags
+    if (user.isAdmin || user.adminId) {
+      console.error("❌ User token has admin flags. Clearing corrupted session.");
+      logout();
+      navigate("/login");
+      return;
+    }
+
+    axios.get(`${API_URL}/api/orders`, {
+      withCredentials: true,
+    })
       .then((response) => {
         console.log("📦 Orders fetched:", response.data);
         setOrders(response.data);
@@ -17,14 +39,21 @@ const Orders = () => {
       })
       .catch((error) => {
         console.error("❌ Error fetching orders:", error);
+        if (error.response?.status === 403 || error.response?.status === 401) {
+          console.warn("⚠️ Received unauthorized response for user orders. Clearing stale auth state.");
+          logout();
+          navigate("/login");
+        }
         setLoading(false);
       });
-  }, []);
+  }, [user, admin, navigate]);
 
   // fetch and display the current status from MongoDB
   const trackOrder = async (orderId) => {
     try {
-      const response = await axios.get(`${API_URL}/api/orders/${orderId}`);
+      const response = await axios.get(`${API_URL}/api/orders/${orderId}`, {
+        withCredentials: true,
+      });
       const order = response.data;
       alert(`Current status for Order ${orderId}: ${order.status}`);
     } catch (error) {
@@ -69,19 +98,22 @@ const Orders = () => {
                     {order.items.map((item, index) => (
                       <li key={index} className="flex items-center border-b pb-2">
                         <img
-                            src={
-                              item.images?.length
-                                ? item.images[0].startsWith("http")
-                                  ? item.images[0]
-                                  : `${API_URL}${item.images[0]}`
-                                : "/fallback-image.jpg"
-                            }
-                            alt={item.name}
-                            className="w-16 h-16 object-cover rounded mr-4"
-                            onError={(e) => {
-                              e.target.src = "/fallback-image.jpg";
-                            }}
-                          />
+                          src={
+                            item.images?.length
+                              ? item.images[0].startsWith("http")
+                                ? item.images[0]
+                                : `${API_URL}${item.images[0]}`
+                              : "/fallback-image.jpg"
+                          }
+                          alt={item.name}
+                          className="w-16 h-16 object-cover rounded mr-4"
+                          crossOrigin="anonymous"
+                          referrerPolicy="no-referrer"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.target.src = "/fallback-image.jpg";
+                          }}
+                        />
                         <div>
                           <p className="font-semibold">{item.name}</p>
                           <p>Size: {item.size || "N/A"}</p>  {/* Display selected size */}

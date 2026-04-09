@@ -5,17 +5,19 @@ import { useNavigate, Link } from "react-router-dom";
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await login(username, password);
-    if (success) {
+    setError("");
+    const result = await login(email, password);
+    // AuthContext.login returns an object { success, message }
+    if (result && result.success) {
       navigate("/cart");
     } else {
-      setError("Invalid credentials. Please try again.");
+      setError(result?.message || "Invalid credentials. Please try again.");
     }
   };
 
@@ -25,13 +27,13 @@ const Login = () => {
       {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block mb-1">Username</label>
+          <label className="block mb-1">Email</label>
           <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full border p-2 rounded"
-            placeholder="Enter your username"
+            placeholder="Enter your email"
           />
         </div>
         <div className="mb-4">
@@ -44,7 +46,7 @@ const Login = () => {
             placeholder="Enter your password"
           />
         </div>
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">
+        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded cursor-pointer hover:bg-orange-700 transition">
           Login
         </button>
       </form>

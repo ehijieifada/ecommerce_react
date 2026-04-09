@@ -1,18 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { assets } from '../assets/assets';
 
 const HeroBanner = () => {
+  const [bannerProduct, setBannerProduct] = useState(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('heroBannerProduct');
+    if (stored) setBannerProduct(JSON.parse(stored));
+  }, []);
+
+  const productLink = bannerProduct?._id ? `/products/${bannerProduct._id}` : '/products/67f3ab194235a05f11c2371b';
+  const imageSrc = bannerProduct?.images?.[0] || assets.hero_img;
+  const title = bannerProduct?.name || 'Beats Solo Wireless';
+  const subtitle = bannerProduct ? `Shop our featured product` : 'Holiday Sale';
+
   return (
     <section
       className="relative w-full flex flex-col-reverse md:flex-row items-center justify-between px-6 md:px-16 py-10 bg-gradient-to-r from-blue-300 to-gray-300"
     >
       {/*  Left Side: Text Content */}
       <div className="text-center md:text-left md:w-1/2 space-y-3">
-        <h1 className="text-lg md:text-xl font-semibold">Beats Solo Wireless</h1>
-        <h2 className="text-2xl md:text-3xl font-bold text-black">Holiday Sale</h2>
+        <h1 className="text-lg md:text-xl font-semibold">{title}</h1>
+        <h2 className="text-2xl md:text-3xl font-bold text-black">{subtitle}</h2>
         <Link
-          to="/products/67f3ab194235a05f11c2371b"
+          to={productLink}
           className="inline-block mt-2 bg-yellow-500 text-black px-4 py-2 rounded-lg hover:bg-gray-200 transition"
         >
           Shop now
@@ -22,7 +34,7 @@ const HeroBanner = () => {
       {/*  Right Side: Hero Image */}
       <div className="flex justify-center md:w-1/2">
         <img
-          src={assets.hero_img}
+          src={imageSrc}
           alt="Hero"
           className=" w-full max-w-xs sm:max-w-sm md:max-w-md object-contain"
         />

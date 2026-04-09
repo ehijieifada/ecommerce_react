@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import AdminSidebar from "./AdminSidebar";
+import { AuthContext } from "../contexts/AuthContext";
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { admin } = useContext(AuthContext);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     axios
-      .get(`${API_URL}/api/orders`)
+      .get(`${API_URL}/api/orders/admin`, {
+        withCredentials: true,
+      })
       .then((response) => {
         console.log("📦 Admin Orders fetched:", response.data);
         setOrders(response.data);
@@ -20,18 +24,26 @@ const AdminOrders = () => {
         console.error("❌ Error fetching admin orders:", error);
         setLoading(false);
       });
-  }, []);
+  }, [admin]);
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await axios.put(`${API_URL}/api/orders/update/${orderId}`, { status: newStatus });
+      await axios.put(
+        `${API_URL}/api/orders/update/${orderId}`,
+        { status: newStatus },
+        {
+          withCredentials: true,
+        }
+      );
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
           order._id === orderId ? { ...order, status: newStatus } : order
         )
       );
+      console.log("✅ Order status updated successfully");
     } catch (error) {
       console.error("❌ Error updating order status:", error);
+      alert(`Error updating order status: ${error.response?.data?.message || error.message}`);
     }
   };
 
@@ -64,6 +76,7 @@ const AdminOrders = () => {
                     >
                       <option value="Pending">Pending</option>
                       <option value="Shipped">Shipped</option>
+                      <option value="Ready for pickup">Ready for Pickup</option>
                       <option value="Out for Delivery">Out for Delivery</option>
                       <option value="Delivered">Delivered</option>
                     </select>

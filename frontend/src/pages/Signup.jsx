@@ -5,23 +5,30 @@ import { useNavigate, Link } from 'react-router-dom';
 const Signup = () => {
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !password) {
+    setError("");
+    setSuccessMessage("");
+
+    if (!email || !password) {
       setError("Please fill all fields.");
       return;
     }
-    
-    signup(username, password);
-    setSuccessMessage("You have successfully registered!");
-    setError('');
-    
-    // Redirect after 2 seconds
+
+    const result = await signup(email, password);
+
+    if (!result.success) {
+      setError(result.message || "Signup failed");
+      return;
+    }
+
+    setSuccessMessage(result.message || "You have successfully registered!");
+
     setTimeout(() => {
       navigate('/login');
     }, 2000);
@@ -34,14 +41,14 @@ const Signup = () => {
       {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label className="block mb-1" htmlFor="username">Username</label>
+          <label className="block mb-1" htmlFor="email">Email</label>
           <input 
-            type="text" 
-            id="username" 
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email" 
+            id="email" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full border p-2 rounded" 
-            placeholder="Enter your username" 
+            placeholder="Enter your email" 
           />
         </div>
         <div className="mb-4">
@@ -57,7 +64,7 @@ const Signup = () => {
         </div>
         <button 
           type="submit" 
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
+          className="w-full bg-gray-600 text-white p-2 rounded cursor-pointer hover:bg-blue-700 transition "
         >
           Sign Up
         </button>

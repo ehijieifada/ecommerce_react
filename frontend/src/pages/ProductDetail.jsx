@@ -13,6 +13,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [success, setSuccess] = useState(false);
   const [mainImage, setMainImage] = useState("");
+  const [isExpanded, setIsExpanded] = useState(false);
 
   
   const API_URL = import.meta.env.VITE_API_URL;
@@ -93,7 +94,27 @@ const formatImageURL = (img) => {
             <p className="pl-2">(202)</p>
           </div>
           <p className="text-xl font-semibold mb-4">${product.price}</p>
-          <p className="text-gray-500 md:w-4/5 mb-4" id="custom_text">{product.description}</p>
+          {/* Truncated description with Read more / Show less toggle */}
+          {(() => {
+            const desc = product.description || "";
+            const MAX_DESC_LENGTH = 150; // characters to show when collapsed
+            const needsTruncate = desc.length > MAX_DESC_LENGTH;
+
+            return (
+              <p className="text-gray-500 md:w-4/5 mb-4" id="custom_text">
+                {isExpanded || !needsTruncate ? desc : `${desc.slice(0, MAX_DESC_LENGTH)}...`}
+                {needsTruncate && (
+                  <button
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    aria-expanded={isExpanded}
+                    className="ml-2 text-blue-600 underline read-more-btn"
+                  >
+                    {isExpanded ? "Show less" : "Read more"}
+                  </button>
+                )}
+              </p>
+            );
+          })()}
 
           {product.sizes && product.sizes.length > 0 && (
             <div className="my-4">

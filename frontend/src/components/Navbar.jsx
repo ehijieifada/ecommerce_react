@@ -6,27 +6,34 @@ import { assets } from '../assets/assets';
 
 const Navbar = () => {
   const { cartItems } = useContext(CartContext);
-  const { user, logout } = useContext(AuthContext);
+  const { user, admin, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // ✅ FIX: unify user/admin
+  const currentUser = user || admin;
+  const isAdmin = !!admin;
 
   return (
     <>
       <nav className="bg-white shadow p-4 flex items-center justify-between">
-        {/* Left Section: Mobile Menu Icon and Logo */}
+        
+        {/* Left Section */}
         <div className="flex items-center space-x-2">
           <div className="md:hidden">
             <button onClick={() => setShowMobileMenu(true)}>
               <img src={assets.menu_icon} alt="Menu" className="h-6 cursor-pointer" />
             </button>
           </div>
+
           <Link to="/">
             <img src={assets.logo} alt="Logo" className="h-8" />
           </Link>
         </div>
 
-        {/* Center: Desktop Navigation Links */}
+        {/* Center Links */}
         <div className="hidden md:flex flex-1 justify-center">
           <ul className="flex space-x-4">
             <li><Link to="/" className="hover:text-blue-600">Home</Link></li>
@@ -36,33 +43,40 @@ const Navbar = () => {
           </ul>
         </div>
 
-        {/* Right Section: Search, Cart, Profile */}
+        {/* Right Section */}
         <div className="flex items-center space-x-4 relative">
+
+          {/* Search */}
           <button onClick={() => navigate('/products?search=true')}>
             <img src={assets.search_icon} alt="Search" className="h-6 cursor-pointer" />
           </button>
-          
+
+          {/* Cart */}
           <Link to="/cart" className="flex items-center hover:text-blue-600">
             <img src={assets.cart_icon} alt="Cart" className="h-6 mr-1" />
             <span>{cartItems.length}</span>
           </Link>
-          
-          {user ? (
+
+          {/* Profile */}
+          {currentUser ? (
             <div className="relative">
-              {/* Profile Icon - Toggle Dropdown */}
+              
+              {/* Profile Icon */}
               <button onClick={() => setShowDropdown(!showDropdown)}>
                 <img src={assets.profile_icon} alt="Profile" className="h-6 cursor-pointer" />
               </button>
 
-              {/* Dropdown Menu */}
+              {/* Dropdown */}
               {showDropdown && (
                 <div className="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg p-2 z-50">
+                  
                   <div className="px-4 py-2 text-gray-700 font-medium">
-                    My Profile: {user.username}
+                    My Profile: {currentUser?.email}
                   </div>
+
                   <button 
                     onClick={() => { 
-                      navigate('/orders'); 
+                      navigate(isAdmin ? '/admin/orders' : '/orders');
                       setShowDropdown(false); 
                     }} 
                     className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
@@ -71,7 +85,11 @@ const Navbar = () => {
                   </button>
 
                   <button 
-                    onClick={() => { logout(); setShowDropdown(false); }} 
+                    onClick={() => { 
+                      logout(); 
+                      setShowDropdown(false); 
+                      navigate('/'); 
+                    }} 
                     className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
                     Logout
@@ -87,7 +105,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Fullscreen Menu Overlay */}
+      {/* Mobile Menu */}
       {showMobileMenu && (
         <div className="fixed inset-0 bg-white z-50 p-6 flex flex-col items-start">
           <button 

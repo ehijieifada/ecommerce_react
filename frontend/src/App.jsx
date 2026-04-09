@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
@@ -18,6 +18,7 @@ import Orders from "./pages/Orders";
 
 // Admin Panel Imports
 import AdminLogin from "./admin/AdminLogin";
+import AdminSignup from "./admin/AdminSignup";
 import AdminDashboard from "./admin/AdminDashboard";
 import AddProduct from "./admin/AddProduct";
 import ListProducts from "./admin/ListProducts";
@@ -26,15 +27,20 @@ import ProtectedAdminRoute from "./admin/ProtectedAdminRoute";
 import AdminLogout from "./admin/AdminLogout";
 
 function App() {
-  return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
-          <ScrollToTop /> {/* Ensures smooth scrolling on route changes */}
-          <Navbar />
-          
-          <main className="min-h-screen container mx-auto px-4 py-6">
-            <Routes>
+  // RoutesWrapper uses useLocation so it must be rendered inside the Router
+  const RoutesWrapper = () => {
+    const location = useLocation();
+    const isAdminRoute = location.pathname.startsWith('/admin');
+    const isHomeRoute = location.pathname === "/";
+
+    return (
+      <>
+        <ScrollToTop /> {/* Ensures smooth scrolling on route changes */}
+        {/* Don't show Navbar on admin routes */}
+        {!isAdminRoute && <Navbar />}
+
+        <main className={isAdminRoute ? "min-h-screen" : isHomeRoute ? "min-h-screen w-full max-w-full px-0" : "min-h-screen container mx-auto px-4 py-6"}>
+          <Routes>
               {/* User Routes */}
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
@@ -49,6 +55,7 @@ function App() {
 
               {/* Admin Panel Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/signup" element={<AdminSignup />} />
               <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
               <Route path="/admin/add" element={<ProtectedAdminRoute><AddProduct /></ProtectedAdminRoute>} />
               <Route path="/admin/list" element={<ProtectedAdminRoute><ListProducts /></ProtectedAdminRoute>} />
@@ -58,6 +65,15 @@ function App() {
           </main>
 
           <Footer />
+      </>
+    );
+  };
+
+  return (
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <RoutesWrapper />
         </Router>
       </CartProvider>
     </AuthProvider>
