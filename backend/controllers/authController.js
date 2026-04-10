@@ -5,10 +5,10 @@ import jwt from "jsonwebtoken";
 const COOKIE_NAME = "token";
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production",
+  sameSite: "none",   // REQUIRED for cross-site
+  secure: true,       // MUST be true in production (HTTPS)
   path: "/",
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 const getTokenFromCookie = (req) => {
