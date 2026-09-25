@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { assets } from '../assets/assets';
 
 const HeroBanner = () => {
   const [bannerProduct, setBannerProduct] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const stored = localStorage.getItem('heroBannerProduct');
-    if (stored) setBannerProduct(JSON.parse(stored));
-  }, []);
+    axios
+      .get(`${API_URL}/api/banners`)
+      .then((response) => setBannerProduct(response.data.heroProduct))
+      .catch((error) => console.error('Error fetching hero banner:', error));
+  }, [API_URL]);
 
   const productLink = bannerProduct?._id ? `/products/${bannerProduct._id}` : '/products/67f3ab194235a05f11c2371b';
   const imageSrc = bannerProduct?.images?.[0] || assets.hero_img;

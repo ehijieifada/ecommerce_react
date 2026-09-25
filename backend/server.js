@@ -11,6 +11,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminAuthRoutes from "./routes/adminAuthRoutes.js"; 
 import genaiRoutes from "./routes/genaiRoutes.js";
+import bannerRoutes from "./routes/bannerRoutes.js";
 import connectCloudinary from "./cloudinaryConfig.js";
 
 const app = express();
@@ -45,6 +46,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/auth", authRoutes); //  User Auth Routes
 app.use("/api/admin", adminAuthRoutes); //  Admin Auth Routes
 app.use("/api/genai", genaiRoutes); // server-side Gemini proxy
+app.use("/api/banners", bannerRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)

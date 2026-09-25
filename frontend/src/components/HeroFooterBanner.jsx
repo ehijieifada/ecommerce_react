@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { assets } from '../assets/assets';
 
 const HeroFooterBanner = () => {
   const [footerProduct, setFooterProduct] = useState(null);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const stored = localStorage.getItem('heroFooterBannerProduct');
-    if (stored) setFooterProduct(JSON.parse(stored));
-  }, []);
+    axios
+      .get(`${API_URL}/api/banners`)
+      .then((response) => setFooterProduct(response.data.footerProduct))
+      .catch((error) => console.error('Error fetching hero footer banner:', error));
+  }, [API_URL]);
 
   const productLink = footerProduct?._id ? `/products/${footerProduct._id}` : '/products/67f3aba44235a05f11c23723';
   const imageSrc = footerProduct?.images?.[0] || assets.herofooter_img;

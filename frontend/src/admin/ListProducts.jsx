@@ -10,29 +10,46 @@ const ListProducts = () => {
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    fetchProducts();
-
-    const storedHeroBanner = localStorage.getItem("heroBannerProduct");
-    const storedHeroFooter = localStorage.getItem("heroFooterBannerProduct");
-
-    if (storedHeroBanner) setHeroBannerProduct(JSON.parse(storedHeroBanner));
-    if (storedHeroFooter) setHeroFooterBannerProduct(JSON.parse(storedHeroFooter));
-  }, []);
-
-  const saveHeroSelection = (key, product, setter) => {
-    localStorage.setItem(key, JSON.stringify(product));
-    setter(product);
-    alert(`${product.name} has been set as ${key === "heroBannerProduct" ? "Hero Banner" : "Hero Footer Banner"}.`);
-  };
-
-  // Fetch products from backend
-  const fetchProducts = () => {
-    axios
-      .get(`${API_URL}/api/products/list`)
-      .then((response) => {
+    const loadProducts = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/products/list`);
         setProducts(response.data);
-      })
-      .catch((error) => console.error("Error fetching products", error));
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    const loadBannerSettings = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/api/banners`);
+        setHeroBannerProduct(response.data.heroProduct);
+        setHeroFooterBannerProduct(response.data.footerProduct);
+      } catch (error) {
+        console.error("Error fetching banner settings:", error);
+      }
+    };
+
+    loadProducts();
+    loadBannerSettings();
+  }, [API_URL]);
+
+  const saveHeroSelection = async (type, product, setter) => {
+    try {
+      const adminToken = localStorage.getItem("adminToken");
+      const response = await axios.put(
+        `${API_URL}/api/banners/${type}`,
+        { productId: product._id },
+        {
+          withCredentials: true,
+          headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
+        }
+      );
+      setter(type === "hero" ? response.data.heroProduct : response.data.footerProduct);
+      alert(`${product.name} has been set as ${type === "hero" ? "Hero Banner" : "Hero Footer Banner"}.`);
+    } catch (error) {
+      console.error("Error saving banner selection:", error);
+      alert(error.response?.data?.message || "Failed to save banner selection.");
+    }
   };
 
   // Function to delete product from MongoDB
@@ -93,13 +110,13 @@ const ListProducts = () => {
               </div>
               <div className="flex flex-col gap-2 sm:flex-row items-end">
                 <button
-                  onClick={() => saveHeroSelection("heroBannerProduct", product, setHeroBannerProduct)}
+                  onClick={() => saveHeroSelection("hero", product, setHeroBannerProduct)}
                   className="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-700 transition"
                 >
                   Set as Hero Banner
                 </button>
                 <button
-                  onClick={() => saveHeroSelection("heroFooterBannerProduct", product, setHeroFooterBannerProduct)}
+                  onClick={() => saveHeroSelection("footer", product, setHeroFooterBannerProduct)}
                   className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-700 transition"
                 >
                   Set as Footer Banner
