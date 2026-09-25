@@ -25,7 +25,7 @@ app.use(cors({
   ],
   credentials: true
 }));
-// Dev helper: expose whether Authorization header was present on responses and log it
+// Dev helper: report header presence without implying cookie auth is missing.
 if (process.env.NODE_ENV !== 'production') {
   app.use((req, res, next) => {
     const auth = req.headers.authorization || req.headers.Authorization;
@@ -33,7 +33,7 @@ if (process.env.NODE_ENV !== 'production') {
       console.log('[server] Request had Authorization header (redacted):', auth.length > 24 ? `${auth.slice(0,12)}...${auth.slice(-8)}` : auth);
       res.setHeader('X-Debug-Auth', 'present');
     } else {
-      console.log('[server] Request had NO Authorization header');
+      console.log('[server] Request had no Authorization header (cookie or public request)');
       res.setHeader('X-Debug-Auth', 'missing');
     }
     next();

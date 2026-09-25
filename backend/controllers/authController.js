@@ -3,10 +3,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const COOKIE_NAME = "token";
+const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: "none",   // REQUIRED for cross-site
-  secure: true,       // MUST be true in production (HTTPS)
+  sameSite: isProduction ? "none" : "lax",
+  secure: isProduction,
   path: "/",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };

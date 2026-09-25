@@ -18,7 +18,6 @@ import Orders from "./pages/Orders";
 
 // Admin Panel Imports
 import AdminLogin from "./admin/AdminLogin";
-import AdminSignup from "./admin/AdminSignup";
 import AdminDashboard from "./admin/AdminDashboard";
 import AddProduct from "./admin/AddProduct";
 import ListProducts from "./admin/ListProducts";
@@ -55,7 +54,6 @@ function App() {
 
               {/* Admin Panel Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/signup" element={<AdminSignup />} />
               <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
               <Route path="/admin/add" element={<ProtectedAdminRoute><AddProduct /></ProtectedAdminRoute>} />
               <Route path="/admin/list" element={<ProtectedAdminRoute><ListProducts /></ProtectedAdminRoute>} />

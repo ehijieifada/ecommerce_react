@@ -3,12 +3,14 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 
 const COOKIE_NAME = "token";
+const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production",
+  sameSite: isProduction ? "none" : "lax",
+  secure: isProduction,
   path: "/",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
@@ -20,15 +22,25 @@ const attachTokenCookie = (res, token) => {
 // Admin Signup
 export const adminSignup = async (req, res) => {
   const { email, password } = req.body;
-  // Protect signup in production: require ADMIN_SIGNUP_TOKEN (env) to be provided
   try {
     const serverToken = process.env.ADMIN_SIGNUP_TOKEN;
-    // If a server token is configured, require it. If not configured, signup is allowed (useful for local dev).
-    if (serverToken) {
-      const provided = req.headers["x-signup-token"] || req.body.token;
-      if (!provided || provided !== serverToken) {
-        return res.status(403).json({ message: "Signup is disabled or invalid signup token" });
-      }
+    const provided = req.headers["x-signup-token"];
+
+    if (!serverToken) {
+      return res.status(503).json({ message: "Admin signup is disabled" });
+    }
+
+    if (
+      typeof provided !== "string" ||
+      provided.length !== serverToken.length ||
+      !crypto.timingSafeEqual(Buffer.from(provided), Buffer.from(serverToken))
+    ) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const allowedEmail = process.env.ADMIN_SIGNUP_EMAIL?.toLowerCase().trim();
+    if (allowedEmail && email?.toLowerCase().trim() !== allowedEmail) {
+      return res.status(403).json({ message: "Forbidden" });
     }
 
     const existingAdmin = await Admin.findOne({ email });
@@ -126,7 +138,7 @@ export const adminLogin = async (req, res) => {
     );
 
     attachTokenCookie(res, token);
-    res.json({ email, isAdmin: true });
+    res.json({ email, isAdmin: true, token });
   } catch (error) {
     res.status(500).json({ message: "Server error", error });
   }

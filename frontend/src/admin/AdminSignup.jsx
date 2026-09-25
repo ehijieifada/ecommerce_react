@@ -22,9 +22,7 @@ const AdminSignup = () => {
     }
 
   setLoading(true);
-  // If frontend has an invite token (only in your controlled deploy), include it in the request body.
-  const signupToken = import.meta.env.VITE_ADMIN_SIGNUP_TOKEN || null;
-  const success = await adminSignup(email, password, signupToken);
+    const success = await adminSignup(email, password);
     setLoading(false);
 
     if (success) {

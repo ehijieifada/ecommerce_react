@@ -22,7 +22,7 @@ const Cart = () => {
           <p className="text-xl font-semibold">Your shopping bag is empty</p>
           <Link
             to="/"
-            className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+            className="mt-4 bg-yellow-500 text-black px-4 py-2 rounded hover:bg-blue-600 transition"
           >
             Continue Shopping
           </Link>

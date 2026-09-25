@@ -11,9 +11,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
+        const adminToken = localStorage.getItem("adminToken");
         const response = await fetch(`${API_URL}/api/auth/me`, {
           method: "GET",
           credentials: "include",
+          headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
         });
 
         const data = await response.json();
@@ -115,6 +117,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(null);
       setAdmin({ email: data.email, isAdmin: true });
+      localStorage.setItem("adminToken", data.token);
       return true;
     } catch (error) {
       console.error("Admin login error:", error);
@@ -123,15 +126,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ✅ ADMIN SIGNUP
-  const adminSignup = async (email, password, signupToken) => {
+  const adminSignup = async (email, password) => {
     try {
-      const body = { email, password };
-      if (signupToken) body.token = signupToken;
-
       const response = await fetch(`${API_URL}/api/admin/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -160,6 +160,7 @@ export const AuthProvider = ({ children }) => {
 
     setUser(null);
     setAdmin(null);
+    localStorage.removeItem("adminToken");
   };
 
   return (

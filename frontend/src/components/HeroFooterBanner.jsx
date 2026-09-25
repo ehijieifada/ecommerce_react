@@ -20,7 +20,7 @@ const HeroFooterBanner = () => {
       className="relative w-full px-6 py-10 md:py-16 flex flex-col-reverse md:flex-row items-center justify-between"
       style={{
         background:
-          'linear-gradient(90deg, rgba(244, 67, 54, 1) 0%, rgba(255, 193, 7, 1) 15%, rgba(209, 190, 26, 1) 31%, rgba(222, 93, 106, 1) 65%, rgba(255, 193, 7, 1) 100%)',
+          'radial-gradient(circle at 18% 20%, rgba(251, 146, 60, 0.34), transparent 28%), radial-gradient(circle at 86% 80%, rgba(244, 63, 94, 0.28), transparent 30%), linear-gradient(115deg, #111827 0%, #1f2937 52%, #7c2d12 100%)',
       }}
     >
       {/*  Left Side: Image */}
@@ -40,7 +40,7 @@ const HeroFooterBanner = () => {
 
         <Link
           to={productLink}
-          className="inline-block mt-4 bg-blue-600 px-5 py-2 text-white rounded-lg text-lg font-semibold hover:bg-orange-800 transition"
+          className="inline-block mt-4 bg-white px-5 py-2 text-slate-900 rounded-lg text-lg font-semibold shadow-lg shadow-black/20 hover:bg-amber-300 transition"
         >
           Shop Now
         </Link>

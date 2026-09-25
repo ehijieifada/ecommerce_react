@@ -6,33 +6,51 @@ import { AuthContext } from "../contexts/AuthContext";
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const { admin } = useContext(AuthContext);
 
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
+    if (!admin) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    const adminToken = localStorage.getItem("adminToken");
     axios
       .get(`${API_URL}/api/orders/admin`, {
         withCredentials: true,
+        headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
       })
       .then((response) => {
         console.log("📦 Admin Orders fetched:", response.data);
-        setOrders(response.data);
-        setLoading(false);
+        setOrders(Array.isArray(response.data) ? response.data : []);
       })
       .catch((error) => {
         console.error("❌ Error fetching admin orders:", error);
+        setError(
+          error.response?.status === 401 || error.response?.status === 403
+            ? "Your admin session has expired. Please log in again."
+            : "Unable to load orders. Please try again."
+        );
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, [admin]);
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
+      const adminToken = localStorage.getItem("adminToken");
       await axios.put(
         `${API_URL}/api/orders/update/${orderId}`,
         { status: newStatus },
         {
           withCredentials: true,
+          headers: adminToken ? { Authorization: `Bearer ${adminToken}` } : {},
         }
       );
       setOrders((prevOrders) =>
@@ -55,6 +73,10 @@ const AdminOrders = () => {
 
         {loading ? (
           <p className="text-center">Loading orders...</p>
+        ) : error ? (
+          <div className="mx-auto max-w-xl rounded-lg border border-red-200 bg-red-50 p-4 text-center text-red-700">
+            {error}
+          </div>
         ) : orders.length === 0 ? (
           <p className="text-center text-gray-600">No orders found.</p>
         ) : (
@@ -65,7 +87,9 @@ const AdminOrders = () => {
                   <div>
                     <p className="font-semibold text-lg">Order ID: {order._id}</p>
                     <p className="text-gray-600">Date: {new Date(order.date).toLocaleDateString()}</p>
-                    <p className="font-bold text-gray-800">Total: ${order.total.toFixed(2)}</p>
+                    <p className="font-bold text-gray-800">
+                      Total: ${Number(order.total || 0).toFixed(2)}
+                    </p>
                   </div>
                   <div className="flex flex-col justify-center">
                     <label className="text-gray-700 font-semibold mb-1">Status:</label>
@@ -87,7 +111,7 @@ const AdminOrders = () => {
                 <div className="mt-4">
                   <h2 className="font-semibold text-lg mb-2">Items</h2>
                   <ul className="space-y-2">
-                    {order.items.map((item, index) => (
+                    {(Array.isArray(order.items) ? order.items : []).map((item, index) => (
                       <li key={index} className="flex items-center border-b pb-2">
                         <img
                             src={

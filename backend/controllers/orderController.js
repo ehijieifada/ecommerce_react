@@ -148,11 +148,12 @@ export const updateOrderStatus = async (req, res) => {
       return res.status(400).json({ message: "Cannot change status of a delivered order" });
     }
 
+    const previousStatus = order.status;
     order.status = status;
     const updatedOrder = await order.save();
 
-    // If status changed to notify user, send status email asynchronously
-    if (["Ready for pickup", "Out for Delivery"].includes(status)) {
+    // Notify the customer whenever the status actually changes.
+    if (previousStatus !== status) {
       sendOrderStatusEmail(updatedOrder, status)
         .then(() => console.log("✅ Status email process finished (see logs)."))
         .catch((err) => console.error("❌ Status email error:", err));

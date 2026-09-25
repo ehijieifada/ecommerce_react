@@ -17,7 +17,7 @@ const HeroBanner = () => {
 
   return (
     <section
-      className="relative w-full flex flex-col-reverse md:flex-row items-center justify-between px-6 md:px-16 py-10 bg-gradient-to-r from-blue-300 to-gray-300"
+      className="relative w-full flex flex-col-reverse md:flex-row items-center justify-between overflow-hidden bg-gradient-to-br from-stone-100 via-orange-50 to-rose-100 px-6 py-10 md:px-16"
     >
       {/*  Left Side: Text Content */}
       <div className="text-center md:text-left md:w-1/2 space-y-3">
