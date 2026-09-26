@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer";
 
-// Create and cache transporter
 let transporter;
 
 function getRecipient(order) {
@@ -24,37 +23,61 @@ function formatAmount(value) {
   return `$${Number(value || 0).toFixed(2)}`;
 }
 
-function getTransporter() {
-  if (transporter) return transporter;
+async function deliverEmail({ to, subject, text, html }) {
+  const from = process.env.FROM_EMAIL || process.env.SMTP_USER;
+  const resendApiKey = process.env.RESEND_API_KEY;
+
+  if (resendApiKey) {
+    if (!process.env.FROM_EMAIL) {
+      throw new Error("FROM_EMAIL must be set to a verified sender address when using Resend");
+    }
+
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from, to: [to], subject, text, html }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const result = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(`Resend rejected the email (${response.status}): ${result.message || "Unknown provider error"}`);
+    }
+
+    console.log("[mailer] Email accepted by Resend:", result.id || "message id unavailable");
+    return;
+  }
 
   const host = process.env.SMTP_HOST;
-  const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined;
+  const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
   if (!host || !user || !pass) {
-    console.warn("[mailer] SMTP not fully configured. Emails will be logged to console instead of sent.");
-    transporter = null;
-    return null;
+    throw new Error("Email is not configured. Set RESEND_API_KEY and FROM_EMAIL, or configure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, and FROM_EMAIL.");
   }
 
-  transporter = nodemailer.createTransport({
-    host,
-    port: port || 587,
-    secure: port === 465,
-    auth: { user, pass },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 20000,
-    tls: { rejectUnauthorized: false },
-  });
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000,
+      tls: { rejectUnauthorized: false },
+    });
+  }
 
-  return transporter;
+  const info = await transporter.sendMail({ from, to, subject, text, html });
+  console.log("[mailer] Email accepted by SMTP:", info.messageId || info.response);
 }
 
 export async function sendOrderConfirmationEmail(order) {
-  const t = getTransporter();
-
   const to = getRecipient(order);
   const name = order.deliveryInfo?.fullName || "Customer";
   const orderId = order.shortId || order._id;
@@ -72,44 +95,10 @@ export async function sendOrderConfirmationEmail(order) {
     .join("");
   const html = `<div style="margin:0;background:#f3f4f6;padding:32px 16px;font-family:Arial,sans-serif;color:#111827"><div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden"><div style="background:#111827;padding:24px 28px;color:#ffffff"><div style="font-size:22px;font-weight:700">BlissTechIq</div><div style="margin-top:6px;color:#d1d5db;font-size:14px">Order confirmation</div></div><div style="padding:28px"><p style="margin-top:0">Hi ${escapeHtml(name)},</p><p>Thank you for shopping with BlissTechIq. Your order has been confirmed and is now being prepared.</p><p><strong>Order number:</strong> ${escapeHtml(orderId)}</p><table style="width:100%;border-collapse:collapse;margin:20px 0"><thead><tr><th style="padding:10px 0;border-bottom:2px solid #111827;text-align:left;font-size:13px">Item</th><th style="padding:10px 0;border-bottom:2px solid #111827;text-align:center;font-size:13px">Qty</th><th style="padding:10px 0;border-bottom:2px solid #111827;text-align:right;font-size:13px">Price</th></tr></thead><tbody>${htmlItems}</tbody><tfoot><tr><td colspan="2" style="padding:16px 0 0;text-align:right;font-weight:700">Total</td><td style="padding:16px 0 0;text-align:right;font-weight:700">${total}</td></tr></tfoot></table><p>We'll email you again when your order status changes.</p><p style="margin-bottom:0">Best regards,<br/><strong>The BlissTechIq Team</strong></p></div></div></div>`;
 
-  if (!t) {
-    console.log("[mailer] (dry-run) would send email to:", to);
-    console.log("[mailer] subject:", subject);
-    console.log("[mailer] text:\n", text);
-    return;
-  }
-
-  const fromAddress = process.env.FROM_EMAIL || process.env.SMTP_USER;
-
-  try {
-    const info = await t.sendMail({ from: fromAddress, to, subject, text, html });
-    console.log("[mailer] Order confirmation email sent:", info.messageId || info.response);
-  } catch (err) {
-    console.error("[mailer] Error sending order confirmation email:", err);
-    try {
-      console.log("[mailer] Attempting Ethereal fallback (development only)...");
-      const testAccount = await nodemailer.createTestAccount();
-      const etherealTransport = nodemailer.createTransport({
-        host: testAccount.smtp.host,
-        port: testAccount.smtp.port,
-        secure: testAccount.smtp.secure,
-        auth: { user: testAccount.user, pass: testAccount.pass },
-      });
-
-      const info = await etherealTransport.sendMail({ from: fromAddress, to, subject, text, html });
-      console.log('[mailer] Ethereal test email sent. Preview URL:', nodemailer.getTestMessageUrl(info));
-      console.log('[mailer] Ethereal messageId:', info.messageId || info.response);
-      return;
-    } catch (fallbackErr) {
-      console.error('[mailer] Ethereal fallback also failed:', fallbackErr);
-      throw err;
-    }
-  }
+  await deliverEmail({ to, subject, text, html });
 }
 
 export async function sendOrderStatusEmail(order, status) {
-  const t = getTransporter();
-
   const to = getRecipient(order);
   const name = order.deliveryInfo?.fullName || "Customer";
   const orderId = order.shortId || order._id;
@@ -136,39 +125,7 @@ export async function sendOrderStatusEmail(order, status) {
     html = `<div style="font-family:Arial,sans-serif;color:#111827"><h2>Order status update</h2><p>Hi ${escapeHtml(name)},</p><p>Your BlissTechIq order <strong>${escapeHtml(orderId)}</strong> has been updated to:</p><p style="font-size:18px;font-weight:700">${escapeHtml(status)}</p><p>We'll keep you informed about the next step.</p><p>Best regards,<br/><strong>The BlissTechIq Team</strong></p></div>`;
   }
 
-  if (!t) {
-    console.log("[mailer] (dry-run) would send status email to:", to);
-    console.log("[mailer] subject:", subject);
-    console.log("[mailer] text:\n", text);
-    return;
-  }
-
-  const fromAddress = process.env.FROM_EMAIL || process.env.SMTP_USER;
-
-  try {
-    const info = await t.sendMail({ from: fromAddress, to, subject, text, html });
-    console.log("[mailer] Order status email sent:", info.messageId || info.response);
-  } catch (err) {
-    console.error("[mailer] Error sending order status email:", err);
-    try {
-      console.log("[mailer] Attempting Ethereal fallback for status email...");
-      const testAccount = await nodemailer.createTestAccount();
-      const etherealTransport = nodemailer.createTransport({
-        host: testAccount.smtp.host,
-        port: testAccount.smtp.port,
-        secure: testAccount.smtp.secure,
-        auth: { user: testAccount.user, pass: testAccount.pass },
-      });
-
-      const info = await etherealTransport.sendMail({ from: fromAddress, to, subject, text, html });
-      console.log('[mailer] Ethereal status email sent. Preview URL:', nodemailer.getTestMessageUrl(info));
-      console.log('[mailer] Ethereal messageId:', info.messageId || info.response);
-      return;
-    } catch (fallbackErr) {
-      console.error('[mailer] Ethereal fallback for status email also failed:', fallbackErr);
-      throw err;
-    }
-  }
+  await deliverEmail({ to, subject, text, html });
 }
 
 export default { sendOrderConfirmationEmail, sendOrderStatusEmail };
