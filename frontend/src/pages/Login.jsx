@@ -46,6 +46,9 @@ const Login = () => {
             placeholder="Enter your password"
           />
         </div>
+        <p className="mb-4 text-right">
+          <Link to="/forgot-password" className="text-blue-600 hover:underline">Forgot password?</Link>
+        </p>
         <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded cursor-pointer hover:bg-orange-700 transition">
           Login
         </button>

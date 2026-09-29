@@ -1,5 +1,6 @@
 import Order from "../models/orderModel.js";
-import { sendOrderConfirmationEmail, sendOrderStatusEmail } from "../utils/mailer.js";
+import { sendAdminNewOrderEmail, sendOrderConfirmationEmail, sendOrderStatusEmail } from "../utils/mailer.js";
+import { sendOrderConfirmationSms, sendOrderStatusSms } from "../utils/sms.js";
 import mongoose from "mongoose";
 
 // Generate a numeric 9-digit id and ensure uniqueness against _id and shortId in the orders collection.
@@ -58,6 +59,12 @@ export const addOrder = async (req, res) => {
     sendOrderConfirmationEmail(newOrder)
       .then(() => console.log("✅ Confirmation email process finished (see logs)."))
       .catch((err) => console.error("❌ Confirmation email error:", err));
+    sendAdminNewOrderEmail(newOrder)
+      .then(() => console.log("✅ Admin order email process finished (see logs)."))
+      .catch((err) => console.error("❌ Admin order email error:", err));
+    sendOrderConfirmationSms(newOrder)
+      .then(() => console.log("✅ Confirmation SMS process finished (see logs)."))
+      .catch((err) => console.error("❌ Confirmation SMS error:", err));
 
     res.status(201).json({ message: "Order placed successfully", order: newOrder });
   } catch (error) {
@@ -157,6 +164,9 @@ export const updateOrderStatus = async (req, res) => {
       sendOrderStatusEmail(updatedOrder, status)
         .then(() => console.log("✅ Status email process finished (see logs)."))
         .catch((err) => console.error("❌ Status email error:", err));
+      sendOrderStatusSms(updatedOrder, status)
+        .then(() => console.log("✅ Status SMS process finished (see logs)."))
+        .catch((err) => console.error("❌ Status SMS error:", err));
     }
 
     res.json({ message: "Order status updated", order: updatedOrder });

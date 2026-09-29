@@ -25,51 +25,20 @@ function formatAmount(value) {
 
 async function deliverEmail({ to, subject, text, html }) {
   const from = process.env.FROM_EMAIL || process.env.SMTP_USER;
-  const resendApiKey = process.env.RESEND_API_KEY;
-
-  if (resendApiKey) {
-    if (!process.env.FROM_EMAIL) {
-      throw new Error("FROM_EMAIL must be set to a verified sender address when using Resend");
-    }
-
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ from, to: [to], subject, text, html }),
-      signal: AbortSignal.timeout(10000),
-    });
-    const result = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      throw new Error(`Resend rejected the email (${response.status}): ${result.message || "Unknown provider error"}`);
-    }
-
-    console.log("[mailer] Email accepted by Resend:", result.id || "message id unavailable");
-    return;
-  }
-
-  const host = process.env.SMTP_HOST;
-  const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  if (!host || !user || !pass) {
-    throw new Error("Email is not configured. Set RESEND_API_KEY and FROM_EMAIL, or configure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, and FROM_EMAIL.");
+  if (!user || !pass) {
+    throw new Error("Email is not configured. Set SMTP_USER to your Gmail address and SMTP_PASS to a Google App Password.");
   }
 
   if (!transporter) {
     transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
+      service: "gmail",
       auth: { user, pass },
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 20000,
-      tls: { rejectUnauthorized: false },
     });
   }
 
@@ -128,4 +97,43 @@ export async function sendOrderStatusEmail(order, status) {
   await deliverEmail({ to, subject, text, html });
 }
 
-export default { sendOrderConfirmationEmail, sendOrderStatusEmail };
+export async function sendAdminNewOrderEmail(order) {
+  const to = (process.env.ADMIN_EMAIL || process.env.ADMIN_SIGNUP_EMAIL || "").trim();
+  if (!to) {
+    throw new Error("Admin order email is not configured. Set ADMIN_EMAIL.");
+  }
+
+  const orderId = order.shortId || order._id;
+  const deliveryInfo = order.deliveryInfo || {};
+  const items = (order.items || []).map((item) => {
+    const name = item.name || item.title || "Item";
+    const quantity = item.quantity || 1;
+    return `- ${name} x${quantity} (${formatAmount(item.price)})`;
+  });
+  const address = [deliveryInfo.address, deliveryInfo.city, deliveryInfo.postalCode, deliveryInfo.country]
+    .filter(Boolean)
+    .join(", ");
+  const subject = `New BlissTechIq order ${orderId}`;
+  const text = `A new order has been placed.\n\nOrder number: ${orderId}\nCustomer: ${deliveryInfo.fullName || "Customer"}\nEmail: ${deliveryInfo.email || "Not provided"}\nPhone: ${deliveryInfo.phone || "Not provided"}\nDelivery address: ${address || "Not provided"}\nPayment method: ${order.paymentMethod || "Not provided"}\nTotal: ${formatAmount(order.total)}\n\nItems:\n${items.join("\n")}`;
+  const htmlItems = (order.items || [])
+    .map((item) => `<li>${escapeHtml(item.name || item.title || "Item")} x${item.quantity || 1} (${formatAmount(item.price)})</li>`)
+    .join("");
+  const html = `<div style="font-family:Arial,sans-serif;color:#111827"><h2>New order received</h2><p><strong>Order number:</strong> ${escapeHtml(orderId)}</p><p><strong>Customer:</strong> ${escapeHtml(deliveryInfo.fullName || "Customer")}<br/><strong>Email:</strong> ${escapeHtml(deliveryInfo.email || "Not provided")}<br/><strong>Phone:</strong> ${escapeHtml(deliveryInfo.phone || "Not provided")}<br/><strong>Delivery address:</strong> ${escapeHtml(address || "Not provided")}<br/><strong>Payment method:</strong> ${escapeHtml(order.paymentMethod || "Not provided")}<br/><strong>Total:</strong> ${formatAmount(order.total)}</p><h3>Items</h3><ul>${htmlItems}</ul></div>`;
+
+  await deliverEmail({ to, subject, text, html });
+}
+
+export async function sendPasswordResetEmail(to, resetUrl) {
+  const subject = "Reset your BlissTechIq password";
+  const text = `We received a request to reset the password for your BlissTechIq account. Use this link within 15 minutes to choose a new password:\n\n${resetUrl}\n\nIf you didn't request this, you can ignore this email.`;
+  const html = `<div style="font-family:Arial,sans-serif;color:#111827"><h2>Reset your password</h2><p>We received a request to reset your BlissTechIq account password.</p><p><a href="${escapeHtml(resetUrl)}" style="display:inline-block;background:#111827;color:#ffffff;padding:12px 18px;text-decoration:none">Choose a new password</a></p><p>This link expires in 15 minutes. If you didn't request a reset, you can ignore this email.</p></div>`;
+
+  await deliverEmail({ to, subject, text, html });
+}
+
+export default {
+  sendAdminNewOrderEmail,
+  sendOrderConfirmationEmail,
+  sendOrderStatusEmail,
+  sendPasswordResetEmail,
+};

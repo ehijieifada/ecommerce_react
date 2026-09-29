@@ -95,6 +95,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const requestPasswordReset = async (email) => {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await response.json();
+      return response.ok
+        ? { success: true, message: data.message }
+        : { success: false, message: data.message || "Unable to request a password reset" };
+    } catch (error) {
+      console.error("Password reset request error:", error);
+      return { success: false, message: "Unable to request a password reset. Please try again." };
+    }
+  };
+
+  const resetPassword = async (token, password) => {
+    try {
+      const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password }),
+      });
+      const data = await response.json();
+      return response.ok
+        ? { success: true, message: data.message }
+        : { success: false, message: data.message || "Unable to reset password" };
+    } catch (error) {
+      console.error("Password reset error:", error);
+      return { success: false, message: "Unable to reset password. Please try again." };
+    }
+  };
+
   // ✅ ADMIN LOGIN
   const adminLogin = async (email, password) => {
     if (!email || !password) {
@@ -170,6 +204,8 @@ export const AuthProvider = ({ children }) => {
         admin,
         signup,
         login,
+        requestPasswordReset,
+        resetPassword,
         adminLogin,
         adminSignup,
         logout,
