@@ -15,6 +15,7 @@ import bannerRoutes from "./routes/bannerRoutes.js";
 import connectCloudinary from "./cloudinaryConfig.js";
 
 const app = express();
+app.set("trust proxy", 1);
 connectCloudinary();
 
 // Middleware
